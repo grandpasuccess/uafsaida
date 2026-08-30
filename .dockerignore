@@ -1,0 +1,16 @@
+# Docker ignore file
+node_modules
+.next
+.git
+.env
+.env.local
+README.md
+Dockerfile
+.dockerignore
+docker-compose.yml
+.github
+.vscode
+*.log
+coverage
+test-results
+playwright-report
