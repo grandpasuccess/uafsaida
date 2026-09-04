@@ -3,6 +3,7 @@
 
 import { Menu, MessageSquare, Monitor, FolderTree, Terminal, Settings, Moon, Sun } from 'lucide-react';
 import { useProjectStore } from '@/lib/store';
+import { CollaborationPanel } from './CollaborationPanel';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -11,7 +12,7 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuToggle, activePanel, onPanelChange }: HeaderProps) {
-  const { theme, setMode, mode, setTheme } = useProjectStore();
+  const { currentProject, theme, setTheme } = useProjectStore();
 
   const panels = [
     { id: 'chat' as const, icon: MessageSquare, label: 'Chat' },
@@ -58,6 +59,9 @@ export function Header({ onMenuToggle, activePanel, onPanelChange }: HeaderProps
 
       {/* Right */}
       <div className="flex items-center gap-2">
+        {currentProject && (
+          <CollaborationPanel projectId={currentProject.id} projectName={currentProject.name} />
+        )}
         <button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"

@@ -8,6 +8,7 @@ import { WorkspacePanel } from '@/components/WorkspacePanel';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { WelcomeScreen } from '@/components/WelcomeScreen';
+import { RealTimeMonitor } from '@/components/RealTimeMonitor';
 import { Project, ChatMessage } from '@/types';
 
 export default function WorkspacePage() {
@@ -54,6 +55,8 @@ export default function WorkspacePage() {
                   onSendMessage={handleSendMessage}
                   isGenerating={isGenerating}
                 />
+                {/* Real-time activity monitor */}
+                <RealTimeMonitor projectId={currentProject.id} />
               </div>
 
               {/* Workspace Panel (Preview, Files, Terminal) */}
