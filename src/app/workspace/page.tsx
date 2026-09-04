@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useProjectStore } from '@/lib/store';
 import { ChatPanel } from '@/components/ChatPanel';
 import { WorkspacePanel } from '@/components/WorkspacePanel';
 import { Sidebar } from '@/components/Sidebar';
@@ -12,9 +11,15 @@ import { RealTimeMonitor } from '@/components/RealTimeMonitor';
 import { Project, ChatMessage } from '@/types';
 
 export default function WorkspacePage() {
-  const { currentProject, addMessage, isGenerating } = useProjectStore();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activePanel, setActivePanel] = useState<'chat' | 'preview' | 'files' | 'terminal'>('chat');
+  const [currentProject, setCurrentProject] = useState<Project | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const addMessage = useCallback((message: ChatMessage) => {
+    setMessages(prev => [...prev, message]);
+  }, []);
 
   const handleSendMessage = useCallback(async (content: string) => {
     const userMessage: ChatMessage = {
@@ -34,10 +39,8 @@ export default function WorkspacePage() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background">
-      {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
-      {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header
           onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
@@ -48,18 +51,15 @@ export default function WorkspacePage() {
         <div className="flex flex-1 overflow-hidden">
           {currentProject ? (
             <>
-              {/* Chat / Main Panel */}
               <div className={`flex flex-1 flex-col ${activePanel === 'chat' ? 'flex' : 'hidden md:flex'}`}>
                 <ChatPanel
                   project={currentProject}
                   onSendMessage={handleSendMessage}
                   isGenerating={isGenerating}
                 />
-                {/* Real-time activity monitor */}
                 <RealTimeMonitor projectId={currentProject.id} />
               </div>
 
-              {/* Workspace Panel (Preview, Files, Terminal) */}
               <div className={`w-full border-l md:w-[450px] lg:w-[550px] ${activePanel !== 'chat' ? 'flex' : 'hidden md:flex'}`}>
                 <WorkspacePanel
                   project={currentProject}
