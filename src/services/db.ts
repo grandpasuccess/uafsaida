@@ -4,7 +4,7 @@
 // Dynamic import to handle Prisma client generation
 let PrismaClientClass: any;
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { PrismaClient } = require('@prisma/client');
   PrismaClientClass = PrismaClient;
 } catch {
