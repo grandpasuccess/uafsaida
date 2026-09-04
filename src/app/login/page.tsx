@@ -1,13 +1,15 @@
 // UAFSAIDA — Login Page
 'use client';
 
-import { signIn } from 'next-auth/react';
 import { Github, Sparkles } from 'lucide-react';
 
-// Force dynamic rendering - this page uses NextAuth which requires runtime env vars
-export const dynamic = 'force-dynamic';
-
 export default function LoginPage() {
+  const handleSignIn = async (provider: string) => {
+    // Dynamic import to prevent prerender errors
+    const { signIn } = await import('next-auth/react');
+    await signIn(provider, { callbackUrl: '/workspace' });
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="w-full max-w-md p-8">
@@ -23,7 +25,7 @@ export default function LoginPage() {
 
         <div className="mt-8 space-y-4">
           <button
-            onClick={() => signIn('github', { callbackUrl: '/workspace' })}
+            onClick={() => handleSignIn('github')}
             className="flex w-full items-center justify-center gap-3 rounded-xl border bg-card px-6 py-4 text-sm font-medium shadow-sm hover:bg-muted transition-colors"
           >
             <Github className="h-5 w-5" />
@@ -31,7 +33,7 @@ export default function LoginPage() {
           </button>
 
           <button
-            onClick={() => signIn('google', { callbackUrl: '/workspace' })}
+            onClick={() => handleSignIn('google')}
             className="flex w-full items-center justify-center gap-3 rounded-xl border bg-card px-6 py-4 text-sm font-medium shadow-sm hover:bg-muted transition-colors"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
