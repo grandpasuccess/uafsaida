@@ -1,3 +1,6 @@
+// UAFSAIDA — Next.js Configuration with Sentry & Vercel Analytics
+const { withSentryConfig } = require('@sentry/nextjs');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -10,6 +13,17 @@ const nextConfig = {
     });
     return config;
   },
+  sentry: {
+    hideSourceMaps: true,
+    tunnelRoute: '/monitoring',
+  },
 };
 
-module.exports = nextConfig;
+const sentryWebpackPluginOptions = {
+  org: 'uafsaida',
+  project: 'uafsaida',
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: true,
+};
+
+module.exports = withSentryConfig(nextConfig, sentryWebpackPluginOptions);
