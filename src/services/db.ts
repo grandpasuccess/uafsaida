@@ -2,28 +2,42 @@
 // Real database operations using Prisma (replaces in-memory store)
 
 // Dynamic import to handle Prisma client generation
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let PrismaClientClass: any;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { PrismaClient } = require('@prisma/client');
-  PrismaClientClass = PrismaClient;
-} catch {
-  // Prisma client not generated yet
-  PrismaClientClass = class {
-    constructor() {
-      throw new Error('Prisma client not generated. Run: pnpm db:generate');
-    }
-  };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadPrismaClient(): Promise<any> {
+  if (PrismaClientClass) return PrismaClientClass;
+  
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const PrismaModule = require('@prisma/client');
+    PrismaClientClass = PrismaModule.PrismaClient || PrismaModule.default?.PrismaClient;
+  } catch {
+    // Prisma client not generated yet - provide stub
+    PrismaClientClass = class {
+      constructor() {
+        throw new Error('Prisma client not generated. Run: pnpm db:generate');
+      }
+    };
+  }
+  
+  return PrismaClientClass;
 }
+
+// Initialize synchronously for compatibility
+loadPrismaClient();
 
 // ═══════════════════════════════════════════════════════════════
 // PRISMA CLIENT (singleton)
 // ═══════════════════════════════════════════════════════════════
 
 const globalForPrisma = globalThis as unknown as {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   prisma: any;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const prisma = globalForPrisma.prisma ?? new PrismaClientClass({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
 });
@@ -45,7 +59,7 @@ export class ProjectService {
     complexity?: string;
     userId: string;
   }) {
-    return (prisma as any).project.create({
+    return prisma.project.create({
       data: {
         name: data.name,
         description: data.description || '',
@@ -59,7 +73,7 @@ export class ProjectService {
   }
 
   async getById(id: string) {
-    return (prisma as any).project.findUnique({
+    return prisma.project.findUnique({
       where: { id },
       include: {
         files: true,
@@ -79,7 +93,7 @@ export class ProjectService {
   }
 
   async getByUser(userId: string) {
-    return (prisma as any).project.findMany({
+    return prisma.project.findMany({
       where: { userId },
       orderBy: { updatedAt: 'desc' },
       include: {
@@ -89,19 +103,19 @@ export class ProjectService {
     });
   }
 
-  async update(id: string, data: Record<string, any>) {
-    return (prisma as any).project.update({
+  async update(id: string, data: Record<string, unknown>) {
+    return prisma.project.update({
       where: { id },
       data: { ...data, updatedAt: new Date() },
     });
   }
 
   async delete(id: string) {
-    return (prisma as any).project.delete({ where: { id } });
+    return prisma.project.delete({ where: { id } });
   }
 
   async updateStatus(id: string, status: string) {
-    return (prisma as any).project.update({
+    return prisma.project.update({
       where: { id },
       data: { status, updatedAt: new Date() },
     });
@@ -114,7 +128,7 @@ export class ProjectService {
 
 export class SessionService {
   async create(projectId: string, userId: string) {
-    return (prisma as any).agentSession.create({
+    return prisma.agentSession.create({
       data: {
         projectId,
         userId,
@@ -125,7 +139,7 @@ export class SessionService {
   }
 
   async getById(id: string) {
-    return (prisma as any).agentSession.findUnique({
+    return prisma.agentSession.findUnique({
       where: { id },
       include: {
         messages: { orderBy: { timestamp: 'asc' } },
@@ -139,9 +153,10 @@ export class SessionService {
     role: string;
     content: string;
     agentRole?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any;
   }) {
-    return (prisma as any).chatMessage.create({
+    return prisma.chatMessage.create({
       data: {
         sessionId,
         role: data.role,
@@ -153,7 +168,7 @@ export class SessionService {
   }
 
   async updatePhase(sessionId: string, phase: string) {
-    return (prisma as any).agentSession.update({
+    return prisma.agentSession.update({
       where: { id: sessionId },
       data: { currentPhase: phase, updatedAt: new Date() },
     });
@@ -174,7 +189,7 @@ export class TaskService {
     dependencies?: string[];
     estimatedDuration?: number;
   }) {
-    return (prisma as any).agentTask.create({
+    return prisma.agentTask.create({
       data: {
         sessionId: data.sessionId,
         agentRole: data.agentRole,
@@ -189,7 +204,7 @@ export class TaskService {
   }
 
   async updateStatus(id: string, status: string) {
-    return (prisma as any).agentTask.update({
+    return prisma.agentTask.update({
       where: { id },
       data: {
         status,
@@ -203,9 +218,10 @@ export class TaskService {
     type: string;
     name: string;
     content: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any;
   }) {
-    return (prisma as any).artifact.create({
+    return prisma.artifact.create({
       data: {
         taskId,
         type: data.type,
@@ -229,7 +245,7 @@ export class FileService {
     isGenerated?: boolean;
     generatedBy?: string;
   }) {
-    return (prisma as any).projectFile.create({
+    return prisma.projectFile.create({
       data: {
         projectId,
         path: data.path,
@@ -243,14 +259,14 @@ export class FileService {
   }
 
   async getByProject(projectId: string) {
-    return (prisma as any).projectFile.findMany({
+    return prisma.projectFile.findMany({
       where: { projectId },
       orderBy: { path: 'asc' },
     });
   }
 
   async update(id: string, content: string) {
-    return (prisma as any).projectFile.update({
+    return prisma.projectFile.update({
       where: { id },
       data: {
         content,
@@ -263,7 +279,7 @@ export class FileService {
   }
 
   async delete(id: string) {
-    return (prisma as any).projectFile.delete({ where: { id } });
+    return prisma.projectFile.delete({ where: { id } });
   }
 }
 
@@ -277,11 +293,12 @@ export class DeploymentService {
     target: string;
     environment?: string;
     domain?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     envVars?: any;
     buildCommand?: string;
     outputDir?: string;
   }) {
-    return (prisma as any).deployment.create({
+    return prisma.deployment.create({
       data: {
         projectId: data.projectId,
         target: data.target,
@@ -296,7 +313,7 @@ export class DeploymentService {
   }
 
   async updateStatus(id: string, status: string, url?: string) {
-    return (prisma as any).deployment.update({
+    return prisma.deployment.update({
       where: { id },
       data: {
         status,
@@ -308,7 +325,7 @@ export class DeploymentService {
   }
 
   async getByProject(projectId: string) {
-    return (prisma as any).deployment.findMany({
+    return prisma.deployment.findMany({
       where: { projectId },
       orderBy: { createdAt: 'desc' },
     });
@@ -327,7 +344,7 @@ export class AgentStateService {
     progress?: number;
     currentTask?: string;
   }) {
-    return (prisma as any).agentState.upsert({
+    return prisma.agentState.upsert({
       where: {
         sessionId_role: {
           sessionId,
@@ -352,7 +369,7 @@ export class AgentStateService {
   }
 
   async getBySession(sessionId: string) {
-    return (prisma as any).agentState.findMany({
+    return prisma.agentState.findMany({
       where: { sessionId },
     });
   }
@@ -365,11 +382,12 @@ export class AgentStateService {
 export class QualityReportService {
   async create(projectId: string, data: {
     overallScore: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     gates: any;
     summary: string;
     recommendations: string[];
   }) {
-    return (prisma as any).qualityReport.create({
+    return prisma.qualityReport.create({
       data: {
         projectId,
         overallScore: data.overallScore,
@@ -381,7 +399,7 @@ export class QualityReportService {
   }
 
   async getLatest(projectId: string) {
-    return (prisma as any).qualityReport.findFirst({
+    return prisma.qualityReport.findFirst({
       where: { projectId },
       orderBy: { createdAt: 'desc' },
     });

@@ -186,7 +186,7 @@ export function ChatPanel({ project, onSendMessage, isGenerating }: ChatPanelPro
                 onClick={openFilePicker}
                 className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors hover:border-primary hover:bg-primary/5"
               >
-                <Image className="mb-2 h-8 w-8 text-muted-foreground" />
+                <Image className="mb-2 h-8 w-8 text-muted-foreground" aria-label="Upload files" />
                 <p className="text-sm font-medium">Click to upload or drag and drop</p>
                 <p className="text-xs text-muted-foreground">Images, PDFs, documents up to 5MB</p>
               </div>
