@@ -4,6 +4,9 @@
 import { signIn } from 'next-auth/react';
 import { Github, Sparkles } from 'lucide-react';
 
+// Force dynamic rendering - this page uses NextAuth which requires runtime env vars
+export const dynamic = 'force-dynamic';
+
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
