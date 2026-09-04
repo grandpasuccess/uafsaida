@@ -1,6 +1,9 @@
 // UAFSAIDA — Metrics API (Admin-only)
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering - don't try to statically generate this route
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   // Return mock metrics during build (Prisma client not yet generated)
   // In production, this would query the actual database
