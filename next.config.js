@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', '@anthropic-ai/sdk'],
@@ -6,6 +8,13 @@ const nextConfig = {
   eslint: {
     // Don't run eslint during build (we run it separately)
     ignoreDuringBuilds: true,
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+    };
+    return config;
   },
 };
 
